@@ -159,7 +159,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         ComputeType: 'BUILD_GENERAL1_LARGE'
-        Image: 'aws/codebuild/docker:1.12.1'
+        Image: 'aws/codebuild/docker:18.09.0'
         Type: 'LINUX_CONTAINER'
       LogsConfig:
         CloudWatchLogs:
