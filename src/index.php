@@ -1,4 +1,5 @@
 <?php
+require_once('./shared.php');
 $pdo = new PDO('mysql:host=' . getenv('RDS_HOSTNAME') .';dbname=test', 'master', getenv('RDS_PASSWORD'));
 $pdo->exec('CREATE TABLE IF NOT EXISTS votes (id INTEGER AUTO_INCREMENT PRIMARY KEY, date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, service VARCHAR(255))');
 ?>
@@ -23,8 +24,8 @@ $pdo->exec('CREATE TABLE IF NOT EXISTS votes (id INTEGER AUTO_INCREMENT PRIMARY 
               foreach($pdo->query('SELECT service, COUNT(*) as votes FROM votes GROUP BY service') as $row) {
               ?>
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                <$php echo $row['service'] ?>
-                <span class="badge badge-dark badge-pill"><$php echo $row['votes'] ?></span>
+                <?php echo $row['service'] ?>
+                <span class="badge badge-dark badge-pill"><?php echo $row['votes'] ?></span>
               </li>
             <?php } ?>
             </ul>
@@ -33,28 +34,11 @@ $pdo->exec('CREATE TABLE IF NOT EXISTS votes (id INTEGER AUTO_INCREMENT PRIMARY 
         <div class="col">
           <div id="vote">
             <h2>Vote</h2>
-            <form action="vote.php" method="post">>
+            <form action="vote.php" method="post">
               <div class="form-group">
                 <label for="exampleFormControlSelect1">Favorite Service</label>
-                <select class="form-control">
-                  <option value="ec2">ec2</option>
-                  <option value="lambda">lambda</option>
-                  <option value="fargate">fargate</option>
-                  <option value="clb">clb</option>
-                  <option value="nlb">nlb</option>
-                  <option value="alb">alb</option>
-                  <option value="appsync">appsync</option>
-                  <option value="apigateway">apigateway</option>
-                  <option value="eks">eks</option>
-                  <option value="ecs">ecs</option>
-                  <option value="rds-aurora">rds-aurora</option>
-                  <option value="rds-postgres">rds-postgres</option>
-                  <option value="rds-mysql">rds-mysql</option>
-                  <option value="rds-mariadb">rds-mariadb</option>
-                  <option value="dynamodb">dynamodb</option>
-                  <option value="s3">s3</option>
-                  <option value="efs">efs</option>
-                  <option value="ebs">ebs</option>
+                <select name="service" class="form-control">
+                  <?php foreach (SERVICES as $service) { echo '<option value="' . $service .'">' . $service .'</option>'; } ?>
                 </select>
               </div>
               <button type="submit" class="btn btn-primary">Submit</button>
