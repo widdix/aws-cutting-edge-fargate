@@ -25,8 +25,6 @@ Resources:
   Key:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
-      Parameters:
-        AlertingModule: !GetAtt 'Alerting.Outputs.StackName'
       TemplateURL: './node_modules/@cfn-modules/kms-key/module.yml'
   Vpc:
     Type: 'AWS::CloudFormation::Stack'
