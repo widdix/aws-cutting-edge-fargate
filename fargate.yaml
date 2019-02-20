@@ -1,0 +1,122 @@
+---
+# Copyright 2018 widdix GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Cutting-Edge Fargate'
+Parameters:
+  AppImage:
+    Description: 'The Docker image (php-fpm container)'
+    Type: String
+  AmbassadorImage:
+    Description: 'Docker image (nginx container)'
+    Type: String
+Resources:
+  Vpc:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        S3Endpoint: 'false'
+        DynamoDBEndpoint: 'false'
+        NatGateways: 'false' # speed up the example
+        FlowLogRetentionInDays: '14'
+      TemplateURL: './node_modules/@cfn-modules/vpc/module.yml'
+  #############################################################################
+  #                                                                           #
+  #                      RDS Auroa Serverless resources                       #
+  #                                                                           #
+  #############################################################################
+  AuroraServerlessClientSg:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/client-sg/module.yml'
+  AuroraServerlessCluster:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        ClientSgModule: !GetAtt 'AuroraServerlessClientSg.Outputs.StackName'
+        DBName: 'test'
+        DBBackupRetentionPeriod: '30'
+        DBMasterUsername: 'master'
+        DBMasterUserPassword: 'SuP3rS3curE'
+        PreferredBackupWindow: '09:54-10:24'
+        PreferredMaintenanceWindow: 'sat:07:00-sat:07:30'
+        AutoPause: 'true'
+        SecondsUntilAutoPause: '300'
+        MaxCapacity: '4'
+        MinCapacity: '2'
+      TemplateURL: './node_modules/@cfn-modules/rds-aurora-serverless/module.yml'
+  #############################################################################
+  #                                                                           #
+  #                   Application load balancer resources                     #
+  #                                                                           #
+  #############################################################################
+  Alb:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/alb/module.yml'
+  AlbListenerHttp:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        AlbModule: !GetAtt 'Alb.Outputs.StackName'
+        Port: '80'
+      TemplateURL: './node_modules/@cfn-modules/alb-listener/module.yml'
+  Target:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        AlbModule: !GetAtt 'Alb.Outputs.StackName'
+        AlbListenerModule: !GetAtt 'AlbListenerHttp.Outputs.StackName'
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+      TemplateURL: './node_modules/@cfn-modules/ecs-alb-target/module.yml'
+  #############################################################################
+  #                                                                           #
+  #                         ECS / Fargate resources                           #
+  #                                                                           #
+  #############################################################################
+  Cluster:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: './node_modules/@cfn-modules/ecs-cluster/module.yml'
+  Service:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        ClusterModule: !GetAtt 'Cluster.Outputs.StackName'
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        TargetModule: !GetAtt 'Target.Outputs.StackName'
+        ClientSgModule1: !GetAtt 'AuroraServerlessClientSg.Outputs.StackName'
+        AmbassadorImage: !Ref AmbassadorImage
+        AmbassadorPort: '80'
+        AppImage: !Ref AppImage
+        AppPort: '9000'
+        AppEnvironment1Key: 'RDS_HOSTNAME'
+        AppEnvironment1Value: !GetAtt 'AuroraServerlessCluster.Outputs.DnsName'
+        AppEnvironment2Key: 'RDS_PASSWORD'
+        AppEnvironment2Value: 'SuP3rS3curE'
+        Cpu: '0.25'
+        Memory: '0.5'
+        DesiredCount: '2'
+        MaxCapacity: '4'
+        MinCapacity: '2'
+        LogsRetentionInDays: '14'
+      TemplateURL: './node_modules/@cfn-modules/fargate-service/module.yml'
+Outputs:
+  Url:
+    Value: !Sub 'http://${Alb.Outputs.DnsName}'

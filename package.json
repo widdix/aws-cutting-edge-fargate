@@ -1,0 +1,18 @@
+{
+  "name": "aws-cutting-edge-fargate",
+  "version": "1.0.0",
+  "description": "AWS Cutting-Edge Fargate",
+  "author": "Michael Wittig <michael@widdix.de>",
+  "license": "Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "@cfn-modules/vpc": "1.1.0",
+    "@cfn-modules/client-sg": "1.0.0",
+    "@cfn-modules/ecs-cluster": "1.0.0",
+    "@cfn-modules/alb": "1.0.3",
+    "@cfn-modules/alb-listener": "1.0.0",
+    "@cfn-modules/ecs-alb-target": "1.0.2",
+    "@cfn-modules/fargate-service": "1.1.1",
+    "@cfn-modules/rds-aurora-serverless": "1.0.0"
+  }
+}

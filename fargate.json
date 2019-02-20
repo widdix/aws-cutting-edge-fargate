@@ -1,0 +1,6 @@
+{ 
+  "Parameters": {
+    "AppImage": {"Fn::GetParam": ["Image", "image.json", "AppImage"]},
+    "AmbassadorImage": {"Fn::GetParam": ["Image", "image.json", "AmbassadorImage"]}
+  }
+}
