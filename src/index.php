@@ -14,6 +14,11 @@ $pdo->exec('CREATE TABLE IF NOT EXISTS votes (id INTEGER AUTO_INCREMENT PRIMARY 
       <div class="jumbotron">
         <h1 class="display-4">Favorite AWS Architecture</h1>
         <p class="lead">Vote for your favorite architecture.</p>
+        <hr class="my-4">
+        <p>Rapid Docker on AWS is made for DevOps engineers and web developers who want to dockerize their web applications and run the Docker containers on Amazon Web Services (AWS). Prior knowledge of Docker and AWS is not required.</p>
+        <p class="lead">
+          <a class="btn btn-primary btn-lg" href="https://cloudonaut.io/rapid-docker-on-aws/?utm_source=cutting-edge-arch" role="button">Check it out</a>
+        </p>
       </div>
       <div class="row">
         <div class="col">
