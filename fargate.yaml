@@ -18,7 +18,7 @@ Parameters:
   AppImage:
     Description: 'The Docker image (php-fpm container)'
     Type: String
-  AmbassadorImage:
+  ProxyImage:
     Description: 'Docker image (nginx container)'
     Type: String
 Resources:
@@ -107,8 +107,8 @@ Resources:
         VpcModule: !GetAtt 'Vpc.Outputs.StackName'
         TargetModule: !GetAtt 'Target.Outputs.StackName'
         ClientSgModule1: !GetAtt 'AuroraServerlessClientSg.Outputs.StackName'
-        AmbassadorImage: !Ref AmbassadorImage
-        AmbassadorPort: '80'
+        ProxyImage: !Ref ProxyImage
+        ProxyPort: '80'
         AppImage: !Ref AppImage
         AppPort: '9000'
         AppEnvironment1Key: 'RDS_HOSTNAME'

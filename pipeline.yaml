@@ -185,7 +185,7 @@ Resources:
               - 'eval $(aws ecr get-login --no-include-email)'
               - 'docker push "${!TAG_NGINX}"'
               - 'docker push "${!TAG_PHP_FPM}"'
-              - 'echo "{\"AmbassadorImage\": \"${!TAG_NGINX}\", \"AppImage\": \"${!TAG_PHP_FPM}\"}" > image.json'
+              - 'echo "{\"ProxyImage\": \"${!TAG_NGINX}\", \"AppImage\": \"${!TAG_PHP_FPM}\"}" > image.json'
           artifacts:
             files:
             - 'image.json'
