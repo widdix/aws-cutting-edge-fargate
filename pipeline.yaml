@@ -29,10 +29,8 @@ Resources:
         Statement:
         - Effect: Allow
           Principal:
-            Service:
-            - 'cloudformation.amazonaws.com'
-          Action:
-          - 'sts:AssumeRole'
+            Service: 'cloudformation.amazonaws.com'
+          Action: 'sts:AssumeRole'
       ManagedPolicyArns:
       - 'arn:aws:iam::aws:policy/AdministratorAccess'
   PipelineRole:
@@ -43,10 +41,8 @@ Resources:
         Statement:
         - Effect: Allow
           Principal:
-            Service:
-            - 'codepipeline.amazonaws.com'
-          Action:
-          - 'sts:AssumeRole'
+            Service: 'codepipeline.amazonaws.com'
+          Action: 'sts:AssumeRole'
       ManagedPolicyArns:
       - 'arn:aws:iam::aws:policy/AdministratorAccess'
   PackageRole:
@@ -84,7 +80,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         ComputeType: 'BUILD_GENERAL1_SMALL'
-        Image: 'amazonlinux:2.0.20181114'
+        Image: 'aws/codebuild/standard:2.0'
         Type: 'LINUX_CONTAINER'
       LogsConfig:
         CloudWatchLogs:
@@ -98,11 +94,8 @@ Resources:
           version: 0.2
           phases:
             install:
-              commands:
-              - 'yum -y install python2-pip'
-              - 'pip install awscli==1.16.90'
-              - 'curl -sL https://rpm.nodesource.com/setup_10.x | bash -'
-              - 'yum -y install nodejs'
+              runtime-versions:
+                nodejs: 10
             build:
               commands:
               - 'npm install'
@@ -159,7 +152,7 @@ Resources:
         Type: CODEPIPELINE
       Environment:
         ComputeType: 'BUILD_GENERAL1_LARGE'
-        Image: 'aws/codebuild/docker:18.09.0'
+        Image: 'aws/codebuild/standard:2.0'
         Type: 'LINUX_CONTAINER'
       LogsConfig:
         CloudWatchLogs:
@@ -172,16 +165,15 @@ Resources:
         BuildSpec: !Sub |
           version: 0.2
           phases:
-            pre_build:
+            install:
+              runtime-versions:
+                docker: 18
+            build:
               commands:
               - 'export TAG_NGINX="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ArtifactsRepository}:nginx-$(date +"%s")"'
               - 'export TAG_PHP_FPM="${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ArtifactsRepository}:php-fpm-$(date +"%s")"'
-            build:
-              commands:
               - 'docker build -t "${!TAG_NGINX}" -f docker/nginx/Dockerfile .'
               - 'docker build -t "${!TAG_PHP_FPM}" -f docker/php-fpm/Dockerfile .'
-            post_build:
-              commands:
               - 'eval $(aws ecr get-login --no-include-email)'
               - 'docker push "${!TAG_NGINX}"'
               - 'docker push "${!TAG_PHP_FPM}"'
