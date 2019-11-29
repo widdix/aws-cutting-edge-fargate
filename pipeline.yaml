@@ -153,6 +153,7 @@ Resources:
       Environment:
         ComputeType: 'BUILD_GENERAL1_LARGE'
         Image: 'aws/codebuild/standard:2.0'
+        PrivilegedMode: true # required to build Docker images
         Type: 'LINUX_CONTAINER'
       LogsConfig:
         CloudWatchLogs:
